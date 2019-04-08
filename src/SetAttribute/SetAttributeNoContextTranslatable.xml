@@ -28,12 +28,7 @@
                     <category>Attributes</category>
                     <description></description>
                 </property>
-                 <!-- <property key="useDynamicValue" type="boolean" required="true" defaultValue="false">
-                     <caption>Use Dynamic Value?</caption>
-                     <category>Attributes</category>
-                     <description>Use an attribute of the context object as the value?</description>
-                 </property>
-                <property key="dynamicValue" type="attribute" required="false" isPath="optional" pathType="reference">
+                <!-- <property key="dynamicValue" type="attribute" required="false" isPath="optional" pathType="reference">
                     <caption>Dynamic Value</caption>
                     <category>Attributes</category>
                     <description></description>

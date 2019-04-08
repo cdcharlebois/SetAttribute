@@ -28,25 +28,25 @@
                     <category>Attributes</category>
                     <description></description>
                 </property>
-                <property key="value" type="string" required="false">
-                  <caption>Value</caption>
-                  <category>Attributes</category>
-                  <description></description>
-                </property>
-                <property key="useDynamicValue" type="boolean" required="true" defaultValue="false">
-                     <caption>Use Dynamic Value?</caption>
+                <property key="nanoflow" type="nanoflow" required="false">
+                     <caption>Nanoflow Value</caption>
                      <category>Attributes</category>
-                     <description>Use an attribute of the context object as the value?</description>
+                     <description>Use a nanoflow that returns a string value.</description>
+                     <returnType type="String"></returnType>
                  </property>
-                <property key="dynamicValue" type="attribute" required="false" isPath="optional" pathType="reference">
+                <property key="dynamicValue" type="attribute" required="false">
                     <caption>Dynamic Value</caption>
                     <category>Attributes</category>
-                    <description></description>
+                    <description>Use an attribute value. Used if Nanoflow Value is empty.</description>
                     <attributeTypes>
                         <attributeType name="String" />
                     </attributeTypes>
                 </property>
-                
+                <property key="value" type="string" required="false">
+                  <caption>Value</caption>
+                  <category>Attributes</category>
+                  <description>Manually set the value. Used if Nanoflow Value and Dynamic Value are empty.</description>
+                </property>
                 <property key="append" type="boolean" defaultValue="false">
                     <caption>Append</caption>
                     <category>Attributes</category>

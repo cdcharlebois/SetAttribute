@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<widget id="SetAttribute.widget.SetAttributeTranslatable" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/">
+<widget id="SetAttribute.widget.SetAttributeTranslatable" needsEntityContext="true" xmlns="http://www.mendix.com/widget/1.0/" offlineCapable="true">
     <name>SetAttribute (Translatable)</name>
     <description>The description of this widget.</description>
 
@@ -28,15 +28,16 @@
                     <category>Attributes</category>
                     <description></description>
                 </property>
-                 <property key="useDynamicValue" type="boolean" required="true" defaultValue="false">
-                     <caption>Use Dynamic Value?</caption>
+                 <property key="nanoflow" type="nanoflow" required="false">
+                     <caption>Nanoflow Value</caption>
                      <category>Attributes</category>
-                     <description>Use an attribute of the context object as the value?</description>
+                     <description>Use a nanoflow that returns a string value.</description>
+                     <returnType type="String"></returnType>
                  </property>
                 <property key="dynamicValue" type="attribute" required="false" isPath="optional" pathType="reference">
                     <caption>Dynamic Value</caption>
                     <category>Attributes</category>
-                    <description></description>
+                    <description>Use an attribute value. Used if Nanoflow Value is empty.</description>
                     <attributeTypes>
                         <attributeType name="String" />
                     </attributeTypes>
@@ -44,7 +45,7 @@
                 <property key="value" type="translatableString" required="false">
                   <caption>Value</caption>
                   <category>Attributes</category>
-                  <description></description>
+                  <description>Manually set the value. Used if Nanoflow Value and Dynamic Value are empty.</description>
                   <translations>
                     <translation lang="en_US"></translation>
                   </translations>
@@ -56,6 +57,5 @@
                 </property>
             </properties>
         </property>
-
     </properties>
 </widget>
