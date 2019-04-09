@@ -25,7 +25,7 @@ define([
     // "dojo/dom",
     // "dojo/dom-prop",
     // "dojo/dom-geometry",
-    // "dojo/dom-class",
+    "dojo/dom-class",
     // "dojo/dom-style",
     // "dojo/dom-construct",
     "dojo/_base/array",
@@ -36,7 +36,7 @@ define([
 
     "dojo/query",
     "dojo/dom-attr",
-], function (declare, _WidgetBase, _TemplatedMixin, dojoArray, dojoLang, dojoQuery, dojoAttr) {
+], function (declare, _WidgetBase, _TemplatedMixin, dojoClass, dojoArray, dojoLang, dojoQuery, dojoAttr) {
     "use strict";
 
 
@@ -52,6 +52,9 @@ define([
         // Internal variables. Non-primitives created in the prototype are shared between all widget instances.
         _handles: null,
         _contextObj: null,
+
+        addedClasses: null,
+        oldContext: null,
 
         // dojo.declare.constructor is called to construct the widget instance. Implement to initialize non-primitive properties.
         constructor: function () {
@@ -75,38 +78,70 @@ define([
             this._updateRendering(callback); // We're passing the callback to updateRendering to be called after DOM-manipulation
         },
 
+        updateAttribute: function (attribute, node, callback) {
+            if (attribute.append === true) {
+                if (dojoAttr.has(node, attribute.attribute)) {
+                    var oldValue = dojoAttr.get(node, attribute.attribute).toString(); // added toString in case it's a JS property
+                    if (oldValue.indexOf(" " + attribute.value) === -1) {
+                        dojoAttr.set(node, attribute.attribute, oldValue + " " + attribute.value);
+                    }
+                } else {
+                    dojoAttr.set(node, attribute.attribute, attribute.value);
+                }
+            } else {
+                dojoAttr.set(node, attribute.attribute, attribute.value);
+            }
+            // The callback, coming from update, needs to be executed, to let the page know it finished rendering
+            if (callback) {
+				callback();
+            }
+        },
+
         // Rerender the interface.
         _updateRendering: function (callback) {
             logger.debug(this.id + "._updateRendering");
-
 
             var nodes = this.local ?
                 dojoQuery(this.domQuery, this.domNode.parentElement) :
                 dojoQuery(this.domQuery);
 
-            dojoArray.forEach(this.attributes, dojoLang.hitch(this, function (attribute) {
-                if (this._contextObj && attribute.useDynamicValue && attribute.dynamicValue) {
-                    attribute.value = this._contextObj.get(attribute.dynamicValue);
+            dojoArray.forEach(nodes, dojoLang.hitch(this, function (node) {
+                logger.debug(this.id + ": Removing " + this.addedClasses);
+                if (node.dataset.addedClasses) {
+                    dojoClass.remove(node, node.dataset.addedClasses);
                 }
-                if (attribute.append === true) {
-                    dojoArray.forEach(nodes, dojoLang.hitch(this, function (node) {
-                        if (dojoAttr.has(node, attribute.attribute)) {
-                            var oldValue = dojoAttr.get(node, attribute.attribute).toString(); // added toString in case it's a JS property
-                            if (oldValue.indexOf(" " + attribute.value) === -1) {
-                                dojoAttr.set(node, attribute.attribute, oldValue + " " + attribute.value);
+				dojoArray.forEach(this.attributes, dojoLang.hitch(this, function (attribute) {
+                    if (this._contextObj && this._doesNanoflowExist(attribute.nanoflow)) {
+                        logger.debug(this.id + ": Using Nanoflow Value");
+                        mx.data.callNanoflow({
+                            nanoflow: attribute.nanoflow,
+                            origin: this.mxform,
+                            context: this.mxcontext,
+                            callback: function (result) {
+                                attribute.value = result;
+                                node.dataset.addedClasses = attribute.value;
+                                this.updateAttribute(attribute, node, callback);
+                            }.bind(this),
+                            error: function (error) {
+                                console.error(error);
                             }
-                        } else {
-                            nodes.attr(attribute.attribute, attribute.value);
-                        }
-                    }));
-                } else {
-                    nodes.attr(attribute.attribute, attribute.value);
-                }
+                        });
+                    } else if (this._contextObj && attribute.dynamicValue) {
+                        logger.debug(this.id + ": Using Dynamic Value");
+                        attribute.value = this._contextObj.get(attribute.dynamicValue);
+                        node.dataset.addedClasses = attribute.value;
+                        this.updateAttribute(attribute, node, callback);
+                    } else if (this._contextObj && attribute.value) {
+                        logger.debug(this.id + ": Using Set Value");
+                        node.dataset.addedClasses = attribute.value;
+                        this.updateAttribute(attribute, node, callback);
+                    } else {
+                        logger.debug(this.id + ": No value set");
+                        node.dataset.addedClasses = "";
+                        this.updateAttribute(attribute, node, callback);
+                    }
+                }));
             }));
-
-
-            // The callback, coming from update, needs to be executed, to let the page know it finished rendering
-            mendix.lang.nullExec(callback);
         },
 
         _unsubscribe: function () {
@@ -135,6 +170,10 @@ define([
 
                 this._handles = [objectHandle];
             }
+        },
+
+        _doesNanoflowExist: function(nanoflow) {
+            return Object.keys(nanoflow) && Object.keys(nanoflow).length > 0;
         }
     });
 });
